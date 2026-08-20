@@ -8,9 +8,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6f8; color: #222; padding: 15px; }
-        .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; }
+        body { background-color: #f4f6f8; color: #222; padding: 20px; }
+        
+        /* Giao diện Responsive: Mặc định 1 cột, từ 900px trở lên (PC) hiện 2 cột song song */
+        .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        @media (min-width: 900px) {
+            .container { max-width: 950px; }
+            .main-layout { display: flex; gap: 30px; align-items: flex-start; }
+            .col-left { flex: 1; }
+            .col-right { flex: 1; border-left: 1px solid #eee; padding-left: 30px; display: none; } /* Mặc định ẩn, bấm tính xong mới hiện cột phải */
+        }
+
+        h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; grid-column: span 2; }
         
         .form-group { margin-bottom: 18px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }
@@ -19,8 +28,8 @@
         
         .input-with-btns { display: flex; gap: 10px; }
         .input-with-btns input { width: 90px; text-align: center; font-weight: bold; font-size: 18px; color: #00a896;}
-        .quick-btns { display: flex; gap: 10px; flex: 1; }
-        .quick-btns button { flex: 1; background: #fafafa; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 600; color: #555; font-size: 15px;}
+        .quick-btns { display: flex; gap: 8px; flex: 1; }
+        .quick-btns button { flex: 1; background: #fafafa; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 600; color: #555; font-size: 14px;}
         .quick-btns button:hover, .quick-btns button:active { background: #00a896; color: white; border-color: #00a896; }
         
         .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
@@ -31,18 +40,20 @@
         .btn-calc:hover { background: #00a896; }
         
         #loading { text-align: center; color: #00a896; display: none; margin: 20px 0; font-weight: 600; }
-        #result-section { display: none; margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px; }
         
-        .highlight-box { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 18px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .highlight-box { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 18px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
         .highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        .highlight-box strong { font-size: 26px; color: #0f766e; }
+        .highlight-box strong { font-size: 24px; color: #0f766e; }
         
-        .table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 400px;}
-        th, td { border-bottom: 1px solid #eee; padding: 12px 10px; text-align: right; }
-        th { background: #fafafa; color: #555; font-weight: 600; }
-        th:first-child, td:first-child { text-align: center; width: 50px; }
-        tr:last-child td { border-bottom: none; }
+        /* Box so sánh trả thẳng */
+        .compare-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #9a3412; }
+        .compare-box strong { font-size: 15px; display: block; margin-top: 4px; color: #c2410c; }
+
+        .table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; max-height: 300px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 350px;}
+        th, td { border-bottom: 1px solid #eee; padding: 10px 8px; text-align: right; background: #fff; }
+        th { background: #fafafa; color: #555; font-weight: 600; position: sticky; top: 0; }
+        th:first-child, td:first-child { text-align: center; width: 45px; }
     </style>
 </head>
 <body>
@@ -50,80 +61,90 @@
 <div class="container">
     <h2>Bảng tính dòng tiền vay</h2>
 
-    <div class="form-group">
-        <label>Giá trị HĐMB (VNĐ)</label>
-        <input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this); updateQuickCalc()">
-    </div>
-
-    <div class="form-group">
-        <label>Tỉ lệ muốn vay (%)</label>
-        <div class="input-with-btns">
-            <input type="number" id="loan-ratio" value="70" oninput="updateQuickCalc()" min="0" max="100">
-            <div class="quick-btns">
-                <button type="button" onclick="setRatio(50)">50%</button>
-                <button type="button" onclick="setRatio(70)">70%</button>
-                <button type="button" onclick="setRatio(80)">80%</button>
+    <div class="main-layout">
+        <!-- CỘT TRÁI: NHẬP LIỆU -->
+        <div class="col-left">
+            <div class="form-group">
+                <label>Giá trị HĐMB (VNĐ)</label>
+                <input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this); updateQuickCalc()">
             </div>
-        </div>
-    </div>
 
-    <div class="form-group">
-        <label>Số tiền ngân hàng cho vay (VNĐ)</label>
-        <input type="text" id="loan-amount-display" value="2,100,000,000" readonly style="background-color: #f0fdfa; color: #0f766e; font-weight: 700; border-color: #ccfbf1;">
-    </div>
-
-    <div class="form-group">
-        <label>Thời gian vay (Năm)</label>
-        <input type="number" id="loan-term" value="20">
-    </div>
-
-    <div class="form-group">
-        <label>Gói ưu đãi (Chọn nhiều)</label>
-        <div class="checkbox-list" id="promo-container">
-            <label style="color:#888;">Đang tải dữ liệu từ hệ thống...</label>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label>Ngân hàng hỗ trợ</label>
-        <select id="bank-select">
-            <option>Đang tải dữ liệu...</option>
-        </select>
-    </div>
-
-    <button class="btn-calc" onclick="calculateLoan()">TÍNH TOÁN NGAY</button>
-    <div class="error-msg" id="api-error" style="color:#e11d48; text-align:center; display:none;">Vui lòng kiểm tra lại đường link API!</div>
-    <div id="loading">Đang xử lý dữ liệu...</div>
-
-    <div id="result-section">
-        <div class="highlight-box">
-            <span>Vốn tự có cần chuẩn bị</span>
-            <strong id="own-capital-display">0 VNĐ</strong>
-        </div>
-        
-        <h4 style="margin-bottom: 12px; color: #333; font-size: 16px;">Chi tiết dòng tiền (24 tháng đầu)</h4>
-        <div class="table-wrapper">
-            <table id="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Kỳ</th>
-                        <th>Gốc (tr)</th>
-                        <th>Lãi (tr)</th>
-                        <th>Tổng trả (tr)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-
-        <div id="export-section" style="margin-top: 25px; padding: 20px; background: #fafafa; border-radius: 8px; border: 1px dashed #00a896;">
-            <h4 style="margin-bottom: 15px; color: #111; font-size: 15px;">📥 Lưu hồ sơ báo giá</h4>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="customer-name" placeholder="Tên KH (VD: Anh Tuan)" style="flex: 2;">
-                <input type="text" id="customer-phone" placeholder="4 số đuôi ĐT" style="flex: 1;" maxlength="4">
+            <div class="form-group">
+                <label>Tỉ lệ muốn vay (%)</label>
+                <div class="input-with-btns">
+                    <input type="number" id="loan-ratio" value="70" oninput="updateQuickCalc()" min="0" max="100">
+                    <div class="quick-btns">
+                        <button type="button" onclick="setRatio(50)">50%</button>
+                        <button type="button" onclick="setRatio(70)">70%</button>
+                        <button type="button" onclick="setRatio(80)">80%</button>
+                    </div>
+                </div>
             </div>
-            <button class="btn-calc" style="background: #0f766e; margin-top: 0; padding: 12px;" onclick="exportExcel()">TẢI ĐẦY ĐỦ BẢNG EXCEL</button>
+
+            <div class="form-group">
+                <label>Số tiền ngân hàng cho vay (VNĐ)</label>
+                <input type="text" id="loan-amount-display" value="2,100,000,000" readonly style="background-color: #f0fdfa; color: #0f766e; font-weight: 700; border-color: #ccfbf1;">
+            </div>
+
+            <div class="form-group">
+                <label>Thời gian vay (Năm)</label>
+                <input type="number" id="loan-term" value="20">
+            </div>
+
+            <div class="form-group">
+                <label>Gói ưu đãi (Chọn nhiều)</label>
+                <div class="checkbox-list" id="promo-container">
+                    <label style="color:#888;">Đang tải dữ liệu...</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ngân hàng hỗ trợ</label>
+                <select id="bank-select">
+                    <option>Đang tải dữ liệu...</option>
+                </select>
+            </div>
+
+            <button class="btn-calc" onclick="calculateLoan()">TÍNH TOÁN NGAY</button>
+            <div id="loading">Đang xử lý dữ liệu...</div>
+        </div>
+
+        <!-- CỘT PHẢI: KẾT QUẢ & SO SÁNH -->
+        <div class="col-right" id="result-section">
+            <div class="highlight-box">
+                <span>Vốn tự có cần chuẩn bị</span>
+                <strong id="own-capital-display">0 VNĐ</strong>
+            </div>
+
+            <div class="compare-box" id="compare-container">
+                <span>So với phương án trả thẳng 100%:</span>
+                <strong id="compare-text">Đang tính toán...</strong>
+            </div>
+            
+            <h4 style="margin-bottom: 10px; color: #333; font-size: 15px;">Chi tiết dòng tiền (24 tháng đầu)</h4>
+            <div class="table-wrapper">
+                <table id="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Kỳ</th>
+                            <th>Gốc (tr)</th>
+                            <th>Lãi (tr)</th>
+                            <th>Tổng trả (tr)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="export-section" style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px dashed #00a896;">
+                <h4 style="margin-bottom: 12px; color: #111; font-size: 14px;">📥 Lưu hồ sơ báo giá (Yêu cầu mã PIN)</h4>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <input type="text" id="customer-name" placeholder="Tên KH (Anh Tuan)" style="flex: 2; padding: 10px; font-size: 14px;">
+                    <input type="text" id="customer-phone" placeholder="4 số ĐT" style="flex: 1; padding: 10px; font-size: 14px;" maxlength="4">
+                </div>
+                <button class="btn-calc" style="background: #0f766e; margin-top: 0; padding: 12px; font-size: 14px;" onclick="exportExcelWithPassword()">TẢI ĐẦY ĐỦ BẢNG EXCEL</button>
+            </div>
         </div>
     </div>
 </div>
@@ -196,7 +217,6 @@
         if(bankData.length === 0) return;
 
         document.getElementById('loading').style.display = 'block';
-        document.getElementById('result-section').style.display = 'none';
 
         setTimeout(() => { 
             let propertyValue = parseValue('property-value');
@@ -236,6 +256,7 @@
             let monthlyPrincipal = payingPrincipalMonths > 0 ? (loanAmount / payingPrincipalMonths) : 0;
             
             fullScheduleData = [];
+            let totalInterestPaid = 0;
 
             for(let i = 1; i <= totalMonths; i++) {
                 let interestThisMonth = 0;
@@ -251,6 +272,7 @@
                 }
 
                 let totalPayment = principalThisMonth + interestThisMonth;
+                totalInterestPaid += interestThisMonth;
 
                 fullScheduleData.push({
                     ky: i,
@@ -273,20 +295,42 @@
                 currentBalance -= principalThisMonth;
             }
 
+            // TÍNH SO SÁNH TRẢ THẲNG
+            let totalCostWithLoan = ownCapital + loanAmount + totalInterestPaid;
+            let diffAmount = totalCostWithLoan - propertyValue;
+            
+            let diffText = "";
+            if(diffAmount >= 0) {
+                diffText = `Tổng chi phí vốn (gốc + lãi) cao hơn trả thẳng: +${Math.round(diffAmount).toLocaleString('vi-VN')} đ (Giữ tiền mặt kinh doanh trong ${loanTermYears} năm).`;
+            } else {
+                diffText = `Nhờ ưu đãi CĐT & quà tặng, tổng chi phí thấp hơn trả thẳng: ${Math.round(diffAmount).toLocaleString('vi-VN')} đ!`;
+            }
+            document.getElementById('compare-text').innerText = diffText;
+
             document.querySelector('#schedule-table tbody').innerHTML = scheduleHTML;
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('result-section').style.display = 'block';
+            
+            // Hiện cột phải khi tính toán xong
+            let colRight = document.querySelector('.col-right');
+            colRight.style.display = 'block';
 
         }, 400);
     }
 
-    // XUẤT EXCEL ĐÃ ĐỊNH DẠNG ĐẸP
-    function exportExcel() {
+    // TẢI EXCEL BẢO MẬT MÃ PIN: 141255
+    function exportExcelWithPassword() {
+        let pass = prompt("Nhập mã PIN bảo mật 6 số để tải file:");
+        if (pass === null) return;
+        if (pass !== "141255") {
+            alert("Mã PIN không chính xác!");
+            return;
+        }
+
         let name = document.getElementById('customer-name').value.trim();
         let phone = document.getElementById('customer-phone').value.trim();
         
         if(!name || !phone) {
-            alert("Vui lòng nhập Tên và 4 số đuôi điện thoại khách hàng!");
+            alert("Vui lòng nhập Tên KH và 4 số đuôi điện thoại!");
             return;
         }
 
@@ -294,11 +338,9 @@
         let dateStr = ("0" + d.getDate()).slice(-2) + ("0" + (d.getMonth() + 1)).slice(-2) + d.getFullYear();
         let fileName = `${name}_${phone}_${dateStr}.xlsx`;
 
-        // Lấy tên ngân hàng đang chọn
         let bankSelect = document.getElementById('bank-select');
         let bankNameText = bankSelect.options[bankSelect.selectedIndex].text;
 
-        // Xây dựng cấu trúc dữ liệu bảng
         let ws_data = [
             ["BẢNG KẾ HOẠCH TÀI CHÍNH & TRẢ NỢ VAY MUA NHÀ"],
             ["THÔNG TIN KHÁCH HÀNG & KHOẢN VAY"],
@@ -311,12 +353,12 @@
             ["- Số tiền vay:", parseValue(document.getElementById('loan-amount-display').id), "VNĐ"],
             ["- Thời gian vay:", parseValue('loan-term') + " năm", ""],
             ["- Vốn tự có chuẩn bị:", document.getElementById('own-capital-display').innerText, ""],
+            ["- So sánh chênh lệch:", document.getElementById('compare-text').innerText, ""],
             [""],
             ["CHI TIẾT DÒNG TIỀN HÀNG THÁNG"],
             ["Kỳ", "Tiền gốc (VNĐ)", "Tiền lãi (VNĐ)", "Tổng phải trả (VNĐ)", "Dư nợ gốc còn lại (VNĐ)"]
         ];
 
-        // Thêm dữ liệu từng tháng
         fullScheduleData.forEach(row => {
             ws_data.push([
                 row.ky, 
@@ -330,13 +372,12 @@
         let wb = XLSX.utils.book_new();
         let ws = XLSX.utils.aoa_to_sheet(ws_data);
 
-        // Định dạng độ rộng cột tự động cho thoáng (không bị chật chữ)
         ws['!cols'] = [
-            {wch: 8},  // Cột Kỳ
-            {wch: 20}, // Cột Gốc
-            {wch: 20}, // Cột Lãi
-            {wch: 22}, // Cột Tổng trả
-            {wch: 25}  // Cột Dư nợ
+            {wch: 8}, 
+            {wch: 20}, 
+            {wch: 20}, 
+            {wch: 22}, 
+            {wch: 25} 
         ];
 
         XLSX.utils.book_append_sheet(wb, ws, "ChiTietDongTien");
