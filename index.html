@@ -10,13 +10,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #f4f6f8; color: #222; padding: 20px; }
         
-        /* Giao diện Responsive: Mặc định 1 cột, từ 900px trở lên (PC) hiện 2 cột song song */
         .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
         @media (min-width: 900px) {
-            .container { max-width: 950px; }
+            .container { max-width: 1000px; }
             .main-layout { display: flex; gap: 30px; align-items: flex-start; }
             .col-left { flex: 1; }
-            .col-right { flex: 1; border-left: 1px solid #eee; padding-left: 30px; display: none; } /* Mặc định ẩn, bấm tính xong mới hiện cột phải */
+            .col-right { flex: 1.1; border-left: 1px solid #eee; padding-left: 30px; display: none; }
         }
 
         h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; grid-column: span 2; }
@@ -45,12 +44,11 @@
         .highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
         .highlight-box strong { font-size: 24px; color: #0f766e; }
         
-        /* Box so sánh trả thẳng */
         .compare-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #9a3412; }
         .compare-box strong { font-size: 15px; display: block; margin-top: 4px; color: #c2410c; }
 
         .table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; max-height: 300px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 350px;}
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 420px;}
         th, td { border-bottom: 1px solid #eee; padding: 10px 8px; text-align: right; background: #fff; }
         th { background: #fafafa; color: #555; font-weight: 600; position: sticky; top: 0; }
         th:first-child, td:first-child { text-align: center; width: 45px; }
@@ -129,7 +127,8 @@
                             <th>Kỳ</th>
                             <th>Gốc (tr)</th>
                             <th>Lãi (tr)</th>
-                            <th>Tổng trả (tr)</th>
+                            <th>Tổng (tr)</th>
+                            <th>Dư nợ (tr)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,8 +188,11 @@
         try {
             const response = await fetch(API_URL);
             const data = await response.json();
-            bankData = data.banks.filter(b => b.Ten_Ngan_Hang);
-            promoData = data.promos.filter(p => p.Ten_Goi);
+            
+            // Lọc bỏ các dòng null/trống do Google Sheets trả về
+            bankData = (data.banks || []).filter(b => b.Ten_Ngan_Hang !== null && b.Ten_Ngan_Hang !== "");
+            promoData = (data.promos || []).filter(p => p.Ten_Goi !== null && p.Ten_Goi !== "");
+            
             renderOptions();
         } catch (error) {
             console.error("Lỗi:", error);
@@ -273,13 +275,14 @@
 
                 let totalPayment = principalThisMonth + interestThisMonth;
                 totalInterestPaid += interestThisMonth;
+                let remainingBalance = currentBalance - principalThisMonth;
 
                 fullScheduleData.push({
                     ky: i,
                     goc: principalThisMonth,
                     lai: interestThisMonth,
                     tong: totalPayment,
-                    duno: currentBalance - principalThisMonth
+                    duno: Math.max(0, remainingBalance)
                 });
 
                 if (i <= 24) {
@@ -288,14 +291,14 @@
                             <td>${i}</td>
                             <td>${(principalThisMonth/1000000).toFixed(1)}</td>
                             <td>${(interestThisMonth/1000000).toFixed(1)}</td>
-                            <td><strong>${(totalPayment/1000000).toFixed(1)}</strong></td>
+                            <td>${(totalPayment/1000000).toFixed(1)}</td>
+                            <td><strong>${(Math.max(0, remainingBalance)/1000000).toFixed(1)}</strong></td>
                         </tr>
                     `;
                 }
-                currentBalance -= principalThisMonth;
+                currentBalance = remainingBalance;
             }
 
-            // TÍNH SO SÁNH TRẢ THẲNG
             let totalCostWithLoan = ownCapital + loanAmount + totalInterestPaid;
             let diffAmount = totalCostWithLoan - propertyValue;
             
@@ -310,14 +313,12 @@
             document.querySelector('#schedule-table tbody').innerHTML = scheduleHTML;
             document.getElementById('loading').style.display = 'none';
             
-            // Hiện cột phải khi tính toán xong
             let colRight = document.querySelector('.col-right');
             colRight.style.display = 'block';
 
         }, 400);
     }
 
-    // TẢI EXCEL BẢO MẬT MÃ PIN: 141255
     function exportExcelWithPassword() {
         let pass = prompt("Nhập mã PIN bảo mật 6 số để tải file:");
         if (pass === null) return;
@@ -365,7 +366,7 @@
                 Math.round(row.goc), 
                 Math.round(row.lai), 
                 Math.round(row.tong), 
-                Math.max(0, Math.round(row.duno))
+                Math.round(row.duno)
             ]);
         });
 
