@@ -1,287 +1,350 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2765.5">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tính dòng tiền vay</title>
+    <!-- Thư viện tạo file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f4f6f8; color: #222; padding: 15px; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; }
+        
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #fafafa;}
+        input:focus, select:focus { border-color: #00a896; background: #fff;}
+        
+        .input-with-btns { display: flex; gap: 10px; }
+        .input-with-btns input { width: 90px; text-align: center; font-weight: bold; font-size: 18px; color: #00a896;}
+        .quick-btns { display: flex; gap: 10px; flex: 1; }
+        .quick-btns button { flex: 1; background: #fafafa; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 600; color: #555; font-size: 15px;}
+        .quick-btns button:hover, .quick-btns button:active { background: #00a896; color: white; border-color: #00a896; }
+        
+        .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
+        .checkbox-list label { display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: normal; margin: 0; background: #fafafa;}
+        .checkbox-list input { margin-right: 12px; width: 18px; height: 18px; accent-color: #00a896; }
+        
+        .btn-calc { width: 100%; padding: 16px; background: #111; color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; transition: 0.2s;}
+        .btn-calc:hover { background: #00a896; }
+        
+        #loading { text-align: center; color: #00a896; display: none; margin: 20px 0; font-weight: 600; }
+        #result-section { display: none; margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px; }
+        
+        .highlight-box { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 18px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+        .highlight-box strong { font-size: 26px; color: #0f766e; }
+        
+        .table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 400px;}
+        th, td { border-bottom: 1px solid #eee; padding: 12px 10px; text-align: right; }
+        th { background: #fafafa; color: #555; font-weight: 600; }
+        th:first-child, td:first-child { text-align: center; width: 50px; }
+        tr:last-child td { border-bottom: none; }
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="vi"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Công cụ tính dòng tiền vay&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body { background-color: #f4f6f8; color: #222; padding: 15px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.form-group { margin-bottom: 18px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; background: #fafafa;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>input:focus, select:focus { border-color: #00a896; background: #fff;}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.radio-group { display: flex; gap: 10px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.radio-btn { flex: 1; text-align: center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.radio-btn input { display: none; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.radio-btn label { display: block; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; background: #fafafa; font-weight: 500;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.radio-btn input:checked + label { background: #00a896; color: white; border-color: #00a896; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.checkbox-list { display: flex; flex-direction: column; gap: 10px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.checkbox-list label { display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: normal; margin: 0; background: #fafafa;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.checkbox-list input { margin-right: 12px; width: 18px; height: 18px; accent-color: #00a896; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-calc { width: 100%; padding: 16px; background: #111; color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; transition: 0.2s;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-calc:hover { background: #00a896; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Kết quả */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#loading { text-align: center; color: #00a896; display: none; margin: 20px 0; font-weight: 600; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#result-section { display: none; margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.highlight-box { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 18px; border-radius: 8px; margin-bottom: 25px; text-align: center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.highlight-box strong { font-size: 26px; color: #0f766e; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 400px;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>th, td { border-bottom: 1px solid #eee; padding: 12px 10px; text-align: right; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>th { background: #fafafa; color: #555; font-weight: 600; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>th:first-child, td:first-child { text-align: center; width: 50px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>tr:last-child td { border-bottom: none; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.error-msg { color: #e11d48; text-align: center; font-size: 14px; margin-top: 10px; display: none;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div class="container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Bảng tính dòng tiền vay&lt;/h2&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="form-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Giá trị HĐMB (VNĐ)&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this)"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="form-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Tỉ lệ muốn vay&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="radio-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="radio-btn"&gt;&lt;input type="radio" name="loan-ratio" id="r50" value="50"&gt;&lt;label for="r50"&gt;50%&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="radio-btn"&gt;&lt;input type="radio" name="loan-ratio" id="r70" value="70" checked&gt;&lt;label for="r70"&gt;70%&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="radio-btn"&gt;&lt;input type="radio" name="loan-ratio" id="r80" value="80"&gt;&lt;label for="r80"&gt;80%&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="form-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Thời gian vay (Năm)&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="number" id="loan-term" value="20"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="form-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Gói ưu đãi (Chọn nhiều)&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-list" id="promo-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;label style="color:#888;"&gt;Đang tải dữ liệu từ hệ thống...&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="form-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label&gt;Ngân hàng hỗ trợ&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;select id="bank-select"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;option&gt;Đang tải dữ liệu...&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/select&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button class="btn-calc" onclick="calculateLoan()"&gt;TÍNH TOÁN NGAY&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="error-msg" id="api-error"&gt;Vui lòng kiểm tra lại đường link API!&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="loading"&gt;Đang xử lý dữ liệu...&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- KẾT QUẢ --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="result-section"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="highlight-box"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span&gt;Vốn tự có cần chuẩn bị&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;strong id="own-capital-display"&gt;0 VNĐ&lt;/strong&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h4 style="margin-bottom: 12px; color: #333; font-size: 16px;"&gt;Chi tiết dòng tiền (24 tháng đầu)&lt;/h4&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="table-wrapper"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;table id="schedule-table"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;thead&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;th&gt;Kỳ&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;th&gt;Gốc (tr)&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;th&gt;Lãi (tr)&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;th&gt;Tổng trả (tr)&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/thead&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;tbody&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;!-- Dữ liệu JS đẩy vào đây --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/tbody&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/table&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// 👇 DÁN LINK CỦA MÀY VÀO ĐÂY (Giữa 2 dấu ngoặc kép) 👇</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const API_URL = "LINK_API_CUA_MAY";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// 👆 DÁN LINK CỦA MÀY VÀO ĐÂY 👆</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let bankData = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let promoData = [];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function formatCurrency(input) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let value = input.value.replace(/,/g, '');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (!isNaN(value) &amp;&amp; value !== "") {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.value = Number(value).toLocaleString('en-US');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function parseValue(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>return Number(document.getElementById(id).value.replace(/,/g, ''));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Hàm an toàn để chuyển đổi số từ Sheet (xử lý cả dấu phẩy và chấm)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function safeParseNumber(val) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (!val) return 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>return Number(val.toString().replace(',', '.'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>async function fetchData() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (API_URL === "LINK_API_CUA_MAY" || API_URL === "") {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('api-error').style.display = 'block';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('promo-container').innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const response = await fetch(API_URL);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const data = await response.json();</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Lọc bỏ các dòng rỗng</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bankData = data.banks.filter(b =&gt; b.Ten_Ngan_Hang);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>promoData = data.promos.filter(p =&gt; p.Ten_Goi);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>renderOptions();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>} catch (error) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>console.error("Lỗi:", error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('promo-container').innerHTML = '&lt;label style="color:red"&gt;Lỗi kết nối dữ liệu!&lt;/label&gt;';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function renderOptions() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Đổ data ưu đãi</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let promoHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>promoData.forEach((promo, index) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>promoHTML += `&lt;label&gt;&lt;input type="checkbox" class="promo-checkbox" value="${index}"&gt; ${promo.Ten_Goi}&lt;/label&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('promo-container').innerHTML = promoHTML || '&lt;label&gt;Không có ưu đãi nào&lt;/label&gt;';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Đổ data ngân hàng</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let bankHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>bankData.forEach((bank, index) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let rateDisplay = safeParseNumber(bank.Lai_Uu_Dai);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bankHTML += `&lt;option value="${index}"&gt;${bank.Ten_Ngan_Hang} (Ưu đãi: ${rateDisplay}%)&lt;/option&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('bank-select').innerHTML = bankHTML;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function calculateLoan() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(bankData.length === 0) return; // Tránh lỗi click khi chưa load xong</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('loading').style.display = 'block';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('result-section').style.display = 'none';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; {<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let propertyValue = parseValue('property-value');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let loanRatio = Number(document.querySelector('input[name="loan-ratio"]:checked').value) / 100;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let loanTermYears = parseValue('loan-term');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let loanAmount = propertyValue * loanRatio;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let totalMonths = loanTermYears * 12;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Tính ưu đãi</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let selectedPromoIndexes = Array.from(document.querySelectorAll('.promo-checkbox:checked')).map(cb =&gt; cb.value);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let graceMonths = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let graceType = "KHONG_AN_HAN";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let totalCashback = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>selectedPromoIndexes.forEach(idx =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let p = promoData[idx];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(p.Loai_An_Han === "AN_HAN_GOC_LAI" || p.Loai_An_Han === "AN_HAN_GOC") {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>graceMonths = Math.max(graceMonths, safeParseNumber(p.So_Thang_An_Han));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>graceType = p.Loai_An_Han;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>totalCashback += safeParseNumber(p.Qua_Tang_Tien_Mat);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Vốn tự có</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let ownCapital = propertyValue - loanAmount - totalCashback;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('own-capital-display').innerText = ownCapital.toLocaleString('vi-VN') + " đ";</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Thông số ngân hàng</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let selectedBank = bankData[document.getElementById('bank-select').value];</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let promoRate = safeParseNumber(selectedBank.Lai_Uu_Dai) / 100 / 12;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let floatRate = safeParseNumber(selectedBank.Lai_Tha_Noi) / 100 / 12;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let bankPromoMonths = safeParseNumber(selectedBank.So_Thang_Uu_Dai);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let scheduleHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let currentBalance = loanAmount;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let payingPrincipalMonths = totalMonths - graceMonths;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Xử lý nếu thời gian ân hạn lớn hơn hoặc bằng tổng thời gian vay (dù hiếm xảy ra)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let monthlyPrincipal = payingPrincipalMonths &gt; 0 ? (loanAmount / payingPrincipalMonths) : 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// In ra 24 tháng đầu</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let displayMonths = Math.min(24, totalMonths);<span class="Apple-converted-space"> </span></span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for(let i = 1; i &lt;= displayMonths; i++) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let interestThisMonth = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let principalThisMonth = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let currentRate = (i &lt;= bankPromoMonths) ? promoRate : floatRate;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>interestThisMonth = currentBalance * currentRate;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (i &lt;= graceMonths) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>principalThisMonth = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (graceType === "AN_HAN_GOC_LAI") interestThisMonth = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>principalThisMonth = monthlyPrincipal;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let totalPayment = principalThisMonth + interestThisMonth;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>scheduleHTML += `</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;td&gt;${i}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;td&gt;${(principalThisMonth/1000000).toFixed(1)}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;td&gt;${(interestThisMonth/1000000).toFixed(1)}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;td&gt;&lt;strong&gt;${(totalPayment/1000000).toFixed(1)}&lt;/strong&gt;&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>currentBalance -= principalThisMonth;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.querySelector('#schedule-table tbody').innerHTML = scheduleHTML;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('loading').style.display = 'none';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('result-section').style.display = 'block';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}, 400); // Đợi 0.4s tạo cảm giác hệ thống đang tính toán</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>fetchData();</span></p>
-<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+<div class="container">
+    <h2>Bảng tính dòng tiền vay</h2>
+
+    <div class="form-group">
+        <label>Giá trị HĐMB (VNĐ)</label>
+        <input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this); updateQuickCalc()">
+    </div>
+
+    <div class="form-group">
+        <label>Tỉ lệ muốn vay (%)</label>
+        <div class="input-with-btns">
+            <input type="number" id="loan-ratio" value="70" oninput="updateQuickCalc()" min="0" max="100">
+            <div class="quick-btns">
+                <button type="button" onclick="setRatio(50)">50%</button>
+                <button type="button" onclick="setRatio(70)">70%</button>
+                <button type="button" onclick="setRatio(80)">80%</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Số tiền ngân hàng cho vay (VNĐ)</label>
+        <input type="text" id="loan-amount-display" value="2,100,000,000" readonly style="background-color: #f0fdfa; color: #0f766e; font-weight: 700; border-color: #ccfbf1;">
+    </div>
+
+    <div class="form-group">
+        <label>Thời gian vay (Năm)</label>
+        <input type="number" id="loan-term" value="20">
+    </div>
+
+    <div class="form-group">
+        <label>Gói ưu đãi (Chọn nhiều)</label>
+        <div class="checkbox-list" id="promo-container">
+            <label style="color:#888;">Đang tải dữ liệu từ hệ thống...</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Ngân hàng hỗ trợ</label>
+        <select id="bank-select">
+            <option>Đang tải dữ liệu...</option>
+        </select>
+    </div>
+
+    <button class="btn-calc" onclick="calculateLoan()">TÍNH TOÁN NGAY</button>
+    <div class="error-msg" id="api-error" style="color:#e11d48; text-align:center; display:none;">Vui lòng kiểm tra lại đường link API!</div>
+    <div id="loading">Đang xử lý dữ liệu...</div>
+
+    <div id="result-section">
+        <div class="highlight-box">
+            <span>Vốn tự có cần chuẩn bị</span>
+            <strong id="own-capital-display">0 VNĐ</strong>
+        </div>
+        
+        <h4 style="margin-bottom: 12px; color: #333; font-size: 16px;">Chi tiết dòng tiền (24 tháng đầu)</h4>
+        <div class="table-wrapper">
+            <table id="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Kỳ</th>
+                        <th>Gốc (tr)</th>
+                        <th>Lãi (tr)</th>
+                        <th>Tổng trả (tr)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="export-section" style="margin-top: 25px; padding: 20px; background: #fafafa; border-radius: 8px; border: 1px dashed #00a896;">
+            <h4 style="margin-bottom: 15px; color: #111; font-size: 15px;">📥 Lưu hồ sơ báo giá</h4>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="customer-name" placeholder="Tên KH (VD: Anh Tuan)" style="flex: 2;">
+                <input type="text" id="customer-phone" placeholder="4 số đuôi ĐT" style="flex: 1;" maxlength="4">
+            </div>
+            <button class="btn-calc" style="background: #0f766e; margin-top: 0; padding: 12px;" onclick="exportExcel()">TẢI ĐẦY ĐỦ BẢNG EXCEL</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyYVEAnJ97M0SwKjZPhPE4NevXbKOEQTgEFTSrMuqXum1JTJoiyS0k7Dy1ycFPhtB9b5Q/exec";
+
+    let bankData = [];
+    let promoData = [];
+    let fullScheduleData = [];
+
+    function formatCurrency(input) {
+        let value = input.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== "") {
+            input.value = Number(value).toLocaleString('en-US');
+        }
+    }
+
+    function parseValue(id) {
+        return Number(document.getElementById(id).value.replace(/,/g, ''));
+    }
+
+    function safeParseNumber(val) {
+        if (!val) return 0;
+        return Number(val.toString().replace(',', '.'));
+    }
+
+    function updateQuickCalc() {
+        let propertyValue = parseValue('property-value');
+        let ratio = Number(document.getElementById('loan-ratio').value) || 0;
+        if(ratio > 100) { ratio = 100; document.getElementById('loan-ratio').value = 100; }
+        let loanAmount = propertyValue * (ratio / 100);
+        document.getElementById('loan-amount-display').value = loanAmount.toLocaleString('en-US');
+    }
+
+    function setRatio(val) {
+        document.getElementById('loan-ratio').value = val;
+        updateQuickCalc(); 
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            bankData = data.banks.filter(b => b.Ten_Ngan_Hang);
+            promoData = data.promos.filter(p => p.Ten_Goi);
+            renderOptions();
+        } catch (error) {
+            console.error("Lỗi:", error);
+            document.getElementById('promo-container').innerHTML = '<label style="color:red">Lỗi kết nối dữ liệu!</label>';
+        }
+    }
+
+    function renderOptions() {
+        let promoHTML = '';
+        promoData.forEach((promo, index) => {
+            promoHTML += `<label><input type="checkbox" class="promo-checkbox" value="${index}"> ${promo.Ten_Goi}</label>`;
+        });
+        document.getElementById('promo-container').innerHTML = promoHTML || '<label>Không có ưu đãi nào</label>';
+
+        let bankHTML = '';
+        bankData.forEach((bank, index) => {
+            let rateDisplay = safeParseNumber(bank.Lai_Uu_Dai);
+            bankHTML += `<option value="${index}">${bank.Ten_Ngan_Hang} (Ưu đãi: ${rateDisplay}%)</option>`;
+        });
+        document.getElementById('bank-select').innerHTML = bankHTML;
+    }
+
+    function calculateLoan() {
+        if(bankData.length === 0) return;
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result-section').style.display = 'none';
+
+        setTimeout(() => { 
+            let propertyValue = parseValue('property-value');
+            let loanRatio = Number(document.getElementById('loan-ratio').value) / 100;
+            let loanTermYears = parseValue('loan-term');
+            
+            let loanAmount = propertyValue * loanRatio;
+            let totalMonths = loanTermYears * 12;
+
+            let selectedPromoIndexes = Array.from(document.querySelectorAll('.promo-checkbox:checked')).map(cb => cb.value);
+            
+            let graceMonths = 0;
+            let graceType = "KHONG_AN_HAN";
+            let totalCashback = 0;
+
+            selectedPromoIndexes.forEach(idx => {
+                let p = promoData[idx];
+                if(p.Loai_An_Han === "AN_HAN_GOC_LAI" || p.Loai_An_Han === "AN_HAN_GOC") {
+                    graceMonths = Math.max(graceMonths, safeParseNumber(p.So_Thang_An_Han));
+                    graceType = p.Loai_An_Han;
+                }
+                totalCashback += safeParseNumber(p.Qua_Tang_Tien_Mat);
+            });
+
+            let ownCapital = propertyValue - loanAmount - totalCashback;
+            document.getElementById('own-capital-display').innerText = ownCapital.toLocaleString('vi-VN') + " đ";
+
+            let selectedBank = bankData[document.getElementById('bank-select').value];
+            
+            let promoRate = safeParseNumber(selectedBank.Lai_Uu_Dai) / 100 / 12; 
+            let floatRate = safeParseNumber(selectedBank.Lai_Tha_Noi) / 100 / 12;
+            let bankPromoMonths = safeParseNumber(selectedBank.So_Thang_Uu_Dai);
+
+            let scheduleHTML = '';
+            let currentBalance = loanAmount;
+            let payingPrincipalMonths = totalMonths - graceMonths;
+            let monthlyPrincipal = payingPrincipalMonths > 0 ? (loanAmount / payingPrincipalMonths) : 0;
+            
+            fullScheduleData = [];
+
+            for(let i = 1; i <= totalMonths; i++) {
+                let interestThisMonth = 0;
+                let principalThisMonth = 0;
+                let currentRate = (i <= bankPromoMonths) ? promoRate : floatRate;
+                interestThisMonth = currentBalance * currentRate;
+
+                if (i <= graceMonths) {
+                    principalThisMonth = 0;
+                    if (graceType === "AN_HAN_GOC_LAI") interestThisMonth = 0;
+                } else {
+                    principalThisMonth = monthlyPrincipal;
+                }
+
+                let totalPayment = principalThisMonth + interestThisMonth;
+
+                fullScheduleData.push({
+                    ky: i,
+                    goc: principalThisMonth,
+                    lai: interestThisMonth,
+                    tong: totalPayment,
+                    duno: currentBalance - principalThisMonth
+                });
+
+                if (i <= 24) {
+                    scheduleHTML += `
+                        <tr>
+                            <td>${i}</td>
+                            <td>${(principalThisMonth/1000000).toFixed(1)}</td>
+                            <td>${(interestThisMonth/1000000).toFixed(1)}</td>
+                            <td><strong>${(totalPayment/1000000).toFixed(1)}</strong></td>
+                        </tr>
+                    `;
+                }
+                currentBalance -= principalThisMonth;
+            }
+
+            document.querySelector('#schedule-table tbody').innerHTML = scheduleHTML;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+
+        }, 400);
+    }
+
+    // XUẤT EXCEL ĐÃ ĐỊNH DẠNG ĐẸP
+    function exportExcel() {
+        let name = document.getElementById('customer-name').value.trim();
+        let phone = document.getElementById('customer-phone').value.trim();
+        
+        if(!name || !phone) {
+            alert("Vui lòng nhập Tên và 4 số đuôi điện thoại khách hàng!");
+            return;
+        }
+
+        let d = new Date();
+        let dateStr = ("0" + d.getDate()).slice(-2) + ("0" + (d.getMonth() + 1)).slice(-2) + d.getFullYear();
+        let fileName = `${name}_${phone}_${dateStr}.xlsx`;
+
+        // Lấy tên ngân hàng đang chọn
+        let bankSelect = document.getElementById('bank-select');
+        let bankNameText = bankSelect.options[bankSelect.selectedIndex].text;
+
+        // Xây dựng cấu trúc dữ liệu bảng
+        let ws_data = [
+            ["BẢNG KẾ HOẠCH TÀI CHÍNH & TRẢ NỢ VAY MUA NHÀ"],
+            ["THÔNG TIN KHÁCH HÀNG & KHOẢN VAY"],
+            ["- Khách hàng:", name, "", "- Ngân hàng:", bankNameText],
+            ["- Số điện thoại:", "xxx.xxx." + phone, "", "- Ngày lập:", d.toLocaleDateString('vi-VN')],
+            [""],
+            ["THÔNG SỐ CƠ BẢN"],
+            ["- Giá trị HĐMB:", parseValue('property-value'), "VNĐ"],
+            ["- Tỉ lệ vay:", document.getElementById('loan-ratio').value + "%", ""],
+            ["- Số tiền vay:", parseValue(document.getElementById('loan-amount-display').id), "VNĐ"],
+            ["- Thời gian vay:", parseValue('loan-term') + " năm", ""],
+            ["- Vốn tự có chuẩn bị:", document.getElementById('own-capital-display').innerText, ""],
+            [""],
+            ["CHI TIẾT DÒNG TIỀN HÀNG THÁNG"],
+            ["Kỳ", "Tiền gốc (VNĐ)", "Tiền lãi (VNĐ)", "Tổng phải trả (VNĐ)", "Dư nợ gốc còn lại (VNĐ)"]
+        ];
+
+        // Thêm dữ liệu từng tháng
+        fullScheduleData.forEach(row => {
+            ws_data.push([
+                row.ky, 
+                Math.round(row.goc), 
+                Math.round(row.lai), 
+                Math.round(row.tong), 
+                Math.max(0, Math.round(row.duno))
+            ]);
+        });
+
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+        // Định dạng độ rộng cột tự động cho thoáng (không bị chật chữ)
+        ws['!cols'] = [
+            {wch: 8},  // Cột Kỳ
+            {wch: 20}, // Cột Gốc
+            {wch: 20}, // Cột Lãi
+            {wch: 22}, // Cột Tổng trả
+            {wch: 25}  // Cột Dư nợ
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "ChiTietDongTien");
+        XLSX.writeFile(wb, fileName);
+    }
+
+    updateQuickCalc();
+    fetchData();
+</script>
 </body>
 </html>
