@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ tính dòng tiền vay</title>
-    <!-- Thư viện tạo file Excel -->
+    <title>Công cụ tính dòng tiền & So sánh ngân hàng - DanEVD</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #f4f6f8; color: #222; padding: 20px; }
         
-        .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        @media (min-width: 900px) {
-            .container { max-width: 1000px; }
-            .main-layout { display: flex; gap: 30px; align-items: flex-start; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { font-size: 24px; margin-bottom: 25px; text-align: center; color: #111; }
+        
+        .main-layout { display: flex; flex-direction: column; gap: 30px; }
+        @media (min-width: 950px) {
+            .calculator-section { display: flex; gap: 30px; align-items: flex-start; }
             .col-left { flex: 1; }
-            .col-right { flex: 1.1; border-left: 1px solid #eee; padding-left: 30px; display: none; }
+            .col-right { flex: 1.2; border-left: 1px solid #eee; padding-left: 30px; display: none; }
         }
 
-        h2 { font-size: 22px; margin-bottom: 25px; text-align: center; color: #111; grid-column: span 2; }
+        .section-title { font-size: 17px; font-weight: 700; color: #0f766e; margin-bottom: 15px; border-bottom: 2px solid #ccfbf1; padding-bottom: 8px; }
         
         .form-group { margin-bottom: 18px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }
@@ -29,7 +30,7 @@
         .input-with-btns input { width: 90px; text-align: center; font-weight: bold; font-size: 18px; color: #00a896;}
         .quick-btns { display: flex; gap: 8px; flex: 1; }
         .quick-btns button { flex: 1; background: #fafafa; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 600; color: #555; font-size: 14px;}
-        .quick-btns button:hover, .quick-btns button:active { background: #00a896; color: white; border-color: #00a896; }
+        .quick-btns button:hover { background: #00a896; color: white; border-color: #00a896; }
         
         .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
         .checkbox-list label { display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: normal; margin: 0; background: #fafafa;}
@@ -41,108 +42,122 @@
         #loading { text-align: center; color: #00a896; display: none; margin: 20px 0; font-weight: 600; }
         
         .highlight-box { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 18px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        .highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+        .highlight-box span { display: block; font-size: 13px; color: #0f766e; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
         .highlight-box strong { font-size: 24px; color: #0f766e; }
         
         .compare-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #9a3412; }
         .compare-box strong { font-size: 15px; display: block; margin-top: 4px; color: #c2410c; }
 
-        .table-wrapper { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; max-height: 300px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 420px;}
-        th, td { border-bottom: 1px solid #eee; padding: 10px 8px; text-align: right; background: #fff; }
-        th { background: #fafafa; color: #555; font-weight: 600; position: sticky; top: 0; }
-        th:first-child, td:first-child { text-align: center; width: 45px; }
+        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #334155; display: flex; flex-direction: column; gap: 8px; }
+        .info-box div strong { color: #0f766e; }
+
+        .table-wrapper { overflow-x: auto; border: 1px solid #ddd; border-radius: 8px; max-height: 450px; background: #fff; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;}
+        th, td { border-bottom: 1px solid #eee; padding: 12px 10px; text-align: right; background: #fff; }
+        th { background: #f8fafc; color: #333; font-weight: 700; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #ddd; }
+        th:first-child, td:first-child { text-align: center; width: 50px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Bảng tính dòng tiền vay</h2>
+    <h2>Công Cụ Tính Dòng Tiền & Vay Mua Nhà</h2>
 
     <div class="main-layout">
-        <!-- CỘT TRÁI: NHẬP LIỆU -->
-        <div class="col-left">
-            <div class="form-group">
-                <label>Giá trị HĐMB (VNĐ)</label>
-                <input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this); updateQuickCalc()">
-            </div>
+        <div class="calculator-section">
+            <!-- CỘT TRÁI: NHẬP LIỆU -->
+            <div class="col-left">
+                <div class="section-title">Thông Số Khoản Vay</div>
+                <div class="form-group">
+                    <label>Giá trị HĐMB (VNĐ)</label>
+                    <input type="text" id="property-value" value="3,000,000,000" onkeyup="formatCurrency(this); updateQuickCalc()">
+                </div>
 
-            <div class="form-group">
-                <label>Tỉ lệ muốn vay (%)</label>
-                <div class="input-with-btns">
-                    <input type="number" id="loan-ratio" value="70" oninput="updateQuickCalc()" min="0" max="100">
-                    <div class="quick-btns">
-                        <button type="button" onclick="setRatio(50)">50%</button>
-                        <button type="button" onclick="setRatio(70)">70%</button>
-                        <button type="button" onclick="setRatio(80)">80%</button>
+                <div class="form-group">
+                    <label>Tỉ lệ muốn vay (%)</label>
+                    <div class="input-with-btns">
+                        <input type="number" id="loan-ratio" value="70" oninput="updateQuickCalc()" min="0" max="100">
+                        <div class="quick-btns">
+                            <button type="button" onclick="setRatio(50)">50%</button>
+                            <button type="button" onclick="setRatio(70)">70%</button>
+                            <button type="button" onclick="setRatio(80)">80%</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Số tiền ngân hàng cho vay (VNĐ)</label>
-                <input type="text" id="loan-amount-display" value="2,100,000,000" readonly style="background-color: #f0fdfa; color: #0f766e; font-weight: 700; border-color: #ccfbf1;">
-            </div>
-
-            <div class="form-group">
-                <label>Thời gian vay (Năm)</label>
-                <input type="number" id="loan-term" value="20">
-            </div>
-
-            <div class="form-group">
-                <label>Gói ưu đãi (Chọn nhiều)</label>
-                <div class="checkbox-list" id="promo-container">
-                    <label style="color:#888;">Đang tải dữ liệu...</label>
+                <div class="form-group">
+                    <label>Số tiền ngân hàng cho vay (VNĐ)</label>
+                    <input type="text" id="loan-amount-display" value="2,100,000,000" readonly style="background-color: #f0fdfa; color: #0f766e; font-weight: 700; border-color: #ccfbf1;">
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Ngân hàng hỗ trợ</label>
-                <select id="bank-select">
-                    <option>Đang tải dữ liệu...</option>
-                </select>
-            </div>
-
-            <button class="btn-calc" onclick="calculateLoan()">TÍNH TOÁN NGAY</button>
-            <div id="loading">Đang xử lý dữ liệu...</div>
-        </div>
-
-        <!-- CỘT PHẢI: KẾT QUẢ & SO SÁNH -->
-        <div class="col-right" id="result-section">
-            <div class="highlight-box">
-                <span>Vốn tự có cần chuẩn bị</span>
-                <strong id="own-capital-display">0 VNĐ</strong>
-            </div>
-
-            <div class="compare-box" id="compare-container">
-                <span>So với phương án trả thẳng 100%:</span>
-                <strong id="compare-text">Đang tính toán...</strong>
-            </div>
-            
-            <h4 style="margin-bottom: 10px; color: #333; font-size: 15px;">Chi tiết dòng tiền (24 tháng đầu)</h4>
-            <div class="table-wrapper">
-                <table id="schedule-table">
-                    <thead>
-                        <tr>
-                            <th>Kỳ</th>
-                            <th>Gốc (tr)</th>
-                            <th>Lãi (tr)</th>
-                            <th>Tổng (tr)</th>
-                            <th>Dư nợ (tr)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="export-section" style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px dashed #00a896;">
-                <h4 style="margin-bottom: 12px; color: #111; font-size: 14px;">📥 Lưu hồ sơ báo giá (Yêu cầu mã PIN)</h4>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <input type="text" id="customer-name" placeholder="Tên KH (Anh Tuan)" style="flex: 2; padding: 10px; font-size: 14px;">
-                    <input type="text" id="customer-phone" placeholder="4 số ĐT" style="flex: 1; padding: 10px; font-size: 14px;" maxlength="4">
+                <div class="form-group">
+                    <label>Thời gian vay (Tháng)</label>
+                    <input type="number" id="loan-term-months" value="240" placeholder="VD: 240 tháng (20 năm)">
                 </div>
-                <button class="btn-calc" style="background: #0f766e; margin-top: 0; padding: 12px; font-size: 14px;" onclick="exportExcelWithPassword()">TẢI ĐẦY ĐỦ BẢNG EXCEL</button>
+
+                <div class="form-group">
+                    <label>Gói ưu đãi CĐT (Chọn nhiều)</label>
+                    <div class="checkbox-list" id="promo-container">
+                        <label style="color:#888;">Đang tải dữ liệu...</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngân hàng hỗ trợ (Kèm Chi nhánh)</label>
+                    <select id="bank-select" onchange="validateBankLimits()">
+                        <option>Đang tải dữ liệu...</option>
+                    </select>
+                </div>
+
+                <button class="btn-calc" onclick="calculateLoan()">TÍNH TOÁN NGAY</button>
+                <div id="loading">DanEVD đang xử lý dữ liệu...</div>
+            </div>
+
+            <!-- CỘT PHẢI: KẾT QUẢ & THÔNG TIN LÃI SUẤT CHI TIẾT -->
+            <div class="col-right" id="result-section">
+                <div class="section-title">📊 Kết Quả Phân Tích Dòng Tiền</div>
+                
+                <div class="highlight-box">
+                    <span>Vốn tự có cần chuẩn bị</span>
+                    <strong id="own-capital-display">0 VNĐ</strong>
+                </div>
+
+                <div class="compare-box" id="compare-container">
+                    <span>So với phương án trả thẳng 100%:</span>
+                    <strong id="compare-text">Đang tính toán...</strong>
+                </div>
+
+                <div class="info-box">
+                    <div><strong>🔹 Lãi suất ưu đãi áp dụng:</strong> <span id="info-promo-rate">---</span></div>
+                    <div><strong>🔸 Lãi suất sau ưu đãi (Thả nổi):</strong> <span id="info-float-rate">---</span></div>
+                    <div><strong>🛡️ Phí trả trước hạn:</strong> <span id="bank-fee-text">---</span></div>
+                </div>
+                
+                <h4 style="margin-bottom: 10px; color: #333; font-size: 15px; font-weight: 700;">Chi tiết dòng tiền (24 tháng đầu)</h4>
+                <div class="table-wrapper">
+                    <table id="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Kỳ</th>
+                                <th>Tiền Gốc (VNĐ)</th>
+                                <th>Tiền Lãi (VNĐ)</th>
+                                <th>Tổng Trả (VNĐ)</th>
+                                <th>Dư Nợ Còn Lại (VNĐ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="export-section" style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px dashed #00a896;">
+                    <h4 style="margin-bottom: 12px; color: #111; font-size: 14px;">📥 Lưu hồ sơ báo giá nội bộ</h4>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <input type="text" id="customer-name" placeholder="Tên KH (Anh Tuan)" style="flex: 2; padding: 10px; font-size: 14px;">
+                        <input type="text" id="customer-phone" placeholder="4 số ĐT" style="flex: 1; padding: 10px; font-size: 14px;" maxlength="4">
+                    </div>
+                    <button class="btn-calc" style="background: #0f766e; margin-top: 0; padding: 12px; font-size: 14px;" onclick="exportExcelWithPassword()">TẢI ĐẦY ĐỦ BẢNG EXCEL</button>
+                </div>
             </div>
         </div>
     </div>
@@ -168,7 +183,8 @@
 
     function safeParseNumber(val) {
         if (!val) return 0;
-        return Number(val.toString().replace(',', '.'));
+        let cleanVal = val.toString().replace('%', '').replace(',', '.').trim();
+        return Number(cleanVal) || 0;
     }
 
     function updateQuickCalc() {
@@ -189,7 +205,6 @@
             const response = await fetch(API_URL);
             const data = await response.json();
             
-            // Lọc bỏ các dòng null/trống do Google Sheets trả về
             bankData = (data.banks || []).filter(b => b.Ten_Ngan_Hang !== null && b.Ten_Ngan_Hang !== "");
             promoData = (data.promos || []).filter(p => p.Ten_Goi !== null && p.Ten_Goi !== "");
             
@@ -203,70 +218,126 @@
     function renderOptions() {
         let promoHTML = '';
         promoData.forEach((promo, index) => {
-            promoHTML += `<label><input type="checkbox" class="promo-checkbox" value="${index}"> ${promo.Ten_Goi}</label>`;
+            promoHTML += `<label><input type="checkbox" class="promo-checkbox" value="${index}" onchange="validateBankLimits()"> ${promo.Ten_Goi} (${promo.So_Thang_An_Han || 0} tháng)</label>`;
         });
         document.getElementById('promo-container').innerHTML = promoHTML || '<label>Không có ưu đãi nào</label>';
 
         let bankHTML = '';
         bankData.forEach((bank, index) => {
-            let rateDisplay = safeParseNumber(bank.Lai_Uu_Dai);
-            bankHTML += `<option value="${index}">${bank.Ten_Ngan_Hang} (Ưu đãi: ${rateDisplay}%)</option>`;
+            let branch = bank.Chi_Nhanh ? ` - Chi nhánh: ${bank.Chi_Nhanh}` : '';
+            bankHTML += `<option value="${index}">${bank.Ten_Ngan_Hang}${branch}</option>`;
         });
         document.getElementById('bank-select').innerHTML = bankHTML;
+    }
+
+    function validateBankLimits() {
+        // Hàm kiểm tra tương tác khi thay đổi lựa chọn ngân hàng
+        let selectedBank = bankData[document.getElementById('bank-select').value];
+        if (!selectedBank) return;
     }
 
     function calculateLoan() {
         if(bankData.length === 0) return;
 
+        let selectedBank = bankData[document.getElementById('bank-select').value];
+        let selectedCheckboxes = document.querySelectorAll('.promo-checkbox:checked');
+        
+        let graceMonths = 0;
+        let graceType = "KHONG_AN_HAN";
+        let totalCashback = 0;
+
+        selectedCheckboxes.forEach(cb => {
+            let p = promoData[cb.value];
+            let months = safeParseNumber(p.So_Thang_An_Han);
+            if (months > graceMonths) {
+                graceMonths = months;
+                graceType = p.Loai_An_Han;
+            }
+            totalCashback += safeParseNumber(p.Qua_Tang_Tien_Mat);
+        });
+
+        let promoMonthsCount = graceMonths > 0 ? graceMonths : 12;
+        let rateFieldRaw = "";
+
+        if (promoMonthsCount <= 12) rateFieldRaw = selectedBank.Lai_12T;
+        else if (promoMonthsCount <= 18) rateFieldRaw = selectedBank.Lai_18T;
+        else if (promoMonthsCount <= 24) rateFieldRaw = selectedBank.Lai_24T;
+        else if (promoMonthsCount <= 36) rateFieldRaw = selectedBank.Lai_36T;
+
+        // 1. Kiểm tra gói ưu đãi tương ứng có hợp lệ không (không được trống hoặc ghi 'x')
+        if (!rateFieldRaw || rateFieldRaw.toString().toLowerCase() === 'x' || rateFieldRaw.toString().trim() === '') {
+            alert(`❌ Từ chối thực hiện: Ngân hàng ${selectedBank.Ten_Ngan_Hang} (${selectedBank.Chi_Nhanh}) KHÔNG hỗ trợ gói lãi suất ưu đãi ${promoMonthsCount} tháng (Dữ liệu trống hoặc là 'x')!`);
+            return;
+        }
+
+        // 2. Bắt buộc kiểm tra lãi suất sau ưu đãi phải đối chiếu ra số
+        let floatRaw = selectedBank.Sau_Uu_Dai;
+        let floatRateVal = safeParseNumber(floatRaw);
+        if (!floatRaw || floatRateVal <= 0) {
+            alert(`❌ Từ chối thực hiện: Lãi suất sau ưu đãi của ngân hàng ${selectedBank.Ten_Ngan_Hang} ("${floatRaw}") bắt buộc phải là số hợp lệ để tính toán!`);
+            return;
+        }
+
+        // 3. Kiểm tra giới hạn tỉ lệ vay (LTV)
+        let loanRatioInput = Number(document.getElementById('loan-ratio').value);
+        let ltvMatch = selectedBank.Ty_Le_Tai_Tro ? selectedBank.Ty_Le_Tai_Tro.match(/\d+/g) : null;
+        if (ltvMatch && ltvMatch.length > 0) {
+            let maxLTV = Math.max(...ltvMatch.map(Number));
+            if (loanRatioInput > maxLTV) {
+                alert(`❌ Từ chối thực hiện: Tỉ lệ vay ${loanRatioInput}% vượt quá hạn mức tài trợ tối đa (${maxLTV}%) của ngân hàng ${selectedBank.Ten_Ngan_Hang}!`);
+                return;
+            }
+        }
+
+        // 4. Kiểm tra giới hạn thời gian vay theo tháng
+        let loanTermMonths = parseValue('loan-term-months');
+        let loanTermYears = loanTermMonths / 12;
+        let maxYearsMatch = selectedBank.Thoi_Gian_Vay ? selectedBank.Thoi_Gian_Vay.match(/\d+/g) : null;
+        if (maxYearsMatch && maxYearsMatch.length > 0) {
+            let maxBankYears = Math.max(...maxYearsMatch.map(Number));
+            let maxBankMonths = maxBankYears * 12;
+            if (loanTermMonths > maxBankMonths) {
+                alert(`❌ Từ chối thực hiện: Thời gian vay ${loanTermMonths} tháng vượt quá giới hạn tối đa (${maxBankYears} năm / ${maxBankMonths} tháng) của ngân hàng ${selectedBank.Ten_Ngan_Hang}!`);
+                return;
+            }
+        }
+
         document.getElementById('loading').style.display = 'block';
 
         setTimeout(() => { 
             let propertyValue = parseValue('property-value');
-            let loanRatio = Number(document.getElementById('loan-ratio').value) / 100;
-            let loanTermYears = parseValue('loan-term');
-            
+            let loanRatio = loanRatioInput / 100;
             let loanAmount = propertyValue * loanRatio;
-            let totalMonths = loanTermYears * 12;
-
-            let selectedPromoIndexes = Array.from(document.querySelectorAll('.promo-checkbox:checked')).map(cb => cb.value);
-            
-            let graceMonths = 0;
-            let graceType = "KHONG_AN_HAN";
-            let totalCashback = 0;
-
-            selectedPromoIndexes.forEach(idx => {
-                let p = promoData[idx];
-                if(p.Loai_An_Han === "AN_HAN_GOC_LAI" || p.Loai_An_Han === "AN_HAN_GOC") {
-                    graceMonths = Math.max(graceMonths, safeParseNumber(p.So_Thang_An_Han));
-                    graceType = p.Loai_An_Han;
-                }
-                totalCashback += safeParseNumber(p.Qua_Tang_Tien_Mat);
-            });
 
             let ownCapital = propertyValue - loanAmount - totalCashback;
             document.getElementById('own-capital-display').innerText = ownCapital.toLocaleString('vi-VN') + " đ";
 
-            let selectedBank = bankData[document.getElementById('bank-select').value];
-            
-            let promoRate = safeParseNumber(selectedBank.Lai_Uu_Dai) / 100 / 12; 
-            let floatRate = safeParseNumber(selectedBank.Lai_Tha_Noi) / 100 / 12;
-            let bankPromoMonths = safeParseNumber(selectedBank.So_Thang_Uu_Dai);
+            let promoRateVal = safeParseNumber(rateFieldRaw);
+            let promoRateStr = `${rateFieldRaw} (Ưu đãi ${promoMonthsCount} tháng)`;
+
+            // Đổ thông tin ra giao diện
+            document.getElementById('info-promo-rate').innerText = promoRateStr;
+            document.getElementById('info-float-rate').innerText = `${floatRaw} (${floatRateVal}% / năm sau ưu đãi)`;
+            document.getElementById('bank-fee-text').innerText = selectedBank.Phi_Tra_Truoc_Han || "Liên hệ chuyên viên ngân hàng.";
+
+            let promoRate = promoRateVal / 100 / 12; 
+            let floatRate = floatRateVal / 100 / 12; 
 
             let scheduleHTML = '';
             let currentBalance = loanAmount;
-            let payingPrincipalMonths = totalMonths - graceMonths;
+            let payingPrincipalMonths = loanTermMonths - promoMonthsCount;
             let monthlyPrincipal = payingPrincipalMonths > 0 ? (loanAmount / payingPrincipalMonths) : 0;
             
             fullScheduleData = [];
             let totalInterestPaid = 0;
 
-            for(let i = 1; i <= totalMonths; i++) {
+            for(let i = 1; i <= loanTermMonths; i++) {
                 let interestThisMonth = 0;
                 let principalThisMonth = 0;
-                let currentRate = (i <= bankPromoMonths) ? promoRate : floatRate;
+                let currentRate = (i <= promoMonthsCount) ? promoRate : floatRate;
                 interestThisMonth = currentBalance * currentRate;
 
-                if (i <= graceMonths) {
+                if (i <= promoMonthsCount && (graceType === "AN_HAN_GOC_LAI" || graceType === "AN_HAN_GOC")) {
                     principalThisMonth = 0;
                     if (graceType === "AN_HAN_GOC_LAI") interestThisMonth = 0;
                 } else {
@@ -289,10 +360,10 @@
                     scheduleHTML += `
                         <tr>
                             <td>${i}</td>
-                            <td>${(principalThisMonth/1000000).toFixed(1)}</td>
-                            <td>${(interestThisMonth/1000000).toFixed(1)}</td>
-                            <td>${(totalPayment/1000000).toFixed(1)}</td>
-                            <td><strong>${(Math.max(0, remainingBalance)/1000000).toFixed(1)}</strong></td>
+                            <td>${Math.round(principalThisMonth).toLocaleString('vi-VN')}</td>
+                            <td>${Math.round(interestThisMonth).toLocaleString('vi-VN')}</td>
+                            <td>${Math.round(totalPayment).toLocaleString('vi-VN')}</td>
+                            <td><strong>${Math.round(Math.max(0, remainingBalance)).toLocaleString('vi-VN')}</strong></td>
                         </tr>
                     `;
                 }
@@ -304,7 +375,7 @@
             
             let diffText = "";
             if(diffAmount >= 0) {
-                diffText = `Tổng chi phí vốn (gốc + lãi) cao hơn trả thẳng: +${Math.round(diffAmount).toLocaleString('vi-VN')} đ (Giữ tiền mặt kinh doanh trong ${loanTermYears} năm).`;
+                diffText = `Tổng chi phí vốn (gốc + lãi) cao hơn trả thẳng: +${Math.round(diffAmount).toLocaleString('vi-VN')} đ (Vay kỳ hạn ${loanTermMonths} tháng).`;
             } else {
                 diffText = `Nhờ ưu đãi CĐT & quà tặng, tổng chi phí thấp hơn trả thẳng: ${Math.round(diffAmount).toLocaleString('vi-VN')} đ!`;
             }
@@ -320,10 +391,10 @@
     }
 
     function exportExcelWithPassword() {
-        let pass = prompt("Nhập mã PIN bảo mật 6 số để tải file:");
+        let pass = prompt("Nhập mã PIN bảo mật 6 số để tải file báo giá:");
         if (pass === null) return;
         if (pass !== "141255") {
-            alert("Mã PIN không chính xác!");
+            alert("Mã PIN không chính xác! Không thể tải file.");
             return;
         }
 
@@ -343,16 +414,19 @@
         let bankNameText = bankSelect.options[bankSelect.selectedIndex].text;
 
         let ws_data = [
-            ["BẢNG KẾ HOẠCH TÀI CHÍNH & TRẢ NỢ VAY MUA NHÀ"],
+            ["BẢNG KẾ HOẠCH TÀI CHÍNH & VAY MUA NHÀ"],
             ["THÔNG TIN KHÁCH HÀNG & KHOẢN VAY"],
             ["- Khách hàng:", name, "", "- Ngân hàng:", bankNameText],
             ["- Số điện thoại:", "xxx.xxx." + phone, "", "- Ngày lập:", d.toLocaleDateString('vi-VN')],
+            ["- Lãi suất ưu đãi:", document.getElementById('info-promo-rate').innerText],
+            ["- Lãi suất sau ưu đãi:", document.getElementById('info-float-rate').innerText],
+            ["- Phí trả trước hạn:", document.getElementById('bank-fee-text').innerText],
             [""],
             ["THÔNG SỐ CƠ BẢN"],
             ["- Giá trị HĐMB:", parseValue('property-value'), "VNĐ"],
             ["- Tỉ lệ vay:", document.getElementById('loan-ratio').value + "%", ""],
             ["- Số tiền vay:", parseValue(document.getElementById('loan-amount-display').id), "VNĐ"],
-            ["- Thời gian vay:", parseValue('loan-term') + " năm", ""],
+            ["- Thời gian vay:", parseValue('loan-term-months') + " tháng", ""],
             ["- Vốn tự có chuẩn bị:", document.getElementById('own-capital-display').innerText, ""],
             ["- So sánh chênh lệch:", document.getElementById('compare-text').innerText, ""],
             [""],
@@ -375,8 +449,8 @@
 
         ws['!cols'] = [
             {wch: 8}, 
-            {wch: 20}, 
-            {wch: 20}, 
+            {wch: 22}, 
+            {wch: 22}, 
             {wch: 22}, 
             {wch: 25} 
         ];
